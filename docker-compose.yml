@@ -1,0 +1,27 @@
+services:
+  init:
+    build: .
+    volumes:
+      - db-data:/db-data
+
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    
+  
+  client:
+    image: postgres:17-alpine
+    command: ["sh", "-c", "sleep 2 && psql -h postgres -c \"SELECT * FROM humanresources.employee WHERE jobtitle LIKE 'Chief%'\""]
+    environment:
+      PGUSER: postgres
+      PGPASSWORD: '1234'
+      PGDATABASE: Adventureworks
+    depends_on:
+      - postgres
+
+volumes:
+  db-data:
